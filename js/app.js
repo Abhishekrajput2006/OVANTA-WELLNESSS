@@ -23,31 +23,39 @@
   function go(h) { if (location.hash === h) route(); else location.hash = h; }
 
   // generated bottle artwork for products without a photo
-  function bottle(x, y, s, color, title) {
+  function bottle(x, y, s, color, title, form, size, line2) {
+    form = form || "drops"; size = size || "30 ml";
+    var FL = { drops: "DROPS", tablet: "TABLETS", capsule: "CAPSULES", softgel: "SOFTGELS", syrup: "SYRUP", serum: "SERUM", resin: "RESIN" }[form] || "DROPS";
+    var jar = form === "tablet" || form === "capsule" || form === "softgel" || form === "resin";
     var t = title.toUpperCase(), fs = t.length > 11 ? 21 : t.length > 8 ? 26 : 32;
     var words = t.split(" "), lines = [t];
     if (t.length > 9 && words.length > 1) { var h = Math.ceil(words.length / 2); lines = [words.slice(0, h).join(" "), words.slice(h).join(" ")]; fs = Math.min(fs + 4, 30); }
     var tx = lines.map(function (l, i) { return '<text x="150" y="' + (330 + i * (fs + 2) - (lines.length - 1) * (fs / 2)) + '" text-anchor="middle" font-family="Georgia,serif" font-weight="700" font-size="' + fs + '" fill="#fff">' + esc(l) + "</text>"; }).join("");
     return '<g transform="translate(' + x + " " + y + ") scale(" + s + ')">' +
       '<ellipse cx="150" cy="535" rx="95" ry="12" fill="rgba(0,0,0,.12)"/>' +
-      '<rect x="105" y="40" width="90" height="62" rx="14" fill="#fff" stroke="#e8e0dc"/><rect x="118" y="52" width="40" height="22" rx="8" fill="#eee9e5"/>' +
-      '<path d="M112 100h76c30 14 52 40 52 78v300c0 30-20 52-52 52h-76c-32 0-52-22-52-52V178c0-38 22-64 52-78z" fill="#fff" stroke="#e8e0dc"/>' +
-      '<path d="M60 255c60 38 120-40 180 0v150c-60-38-120 40-180 0z" fill="' + color + '"/>' +
-      '<path d="M60 255c60 38 120-40 180 0" fill="none" stroke="#e0b030" stroke-width="4"/><path d="M60 405c60 38 120-40 180 0" fill="none" stroke="#e0b030" stroke-width="4"/>' +
-      '<text x="150" y="215" text-anchor="middle" font-family="Georgia,serif" font-weight="700" font-size="26" fill="#1d5a2a">OVNTA</text><text x="150" y="236" text-anchor="middle" font-family="Arial" font-size="12" fill="#6b5a1e">Wellness</text>' +
-      tx + '<text x="150" y="' + (352 + (lines.length - 1) * 18) + '" text-anchor="middle" font-family="Arial" font-size="13" letter-spacing="4" fill="#fff">DROPS</text>' +
-      '<text x="150" y="448" text-anchor="middle" font-family="Arial" font-weight="700" font-size="12" fill="#222">AN AYURVEDIC PROPERTY</text><text x="150" y="468" text-anchor="middle" font-family="Arial" font-weight="700" font-size="15" fill="#1d5a2a">30 ml</text></g>';
+      (jar
+        ? '<rect x="70" y="60" width="160" height="62" rx="12" fill="' + color + '"/><rect x="70" y="60" width="160" height="10" rx="5" fill="rgba(255,255,255,.28)"/><rect x="80" y="122" width="140" height="10" fill="#e8e0dc"/>' +
+          '<path d="M52 150c0-14 10-22 24-22h148c14 0 24 8 24 22v318c0 32-18 54-50 54h-96c-32 0-50-22-50-54z" fill="#fff" stroke="#e8e0dc"/>' +
+          '<path d="M52 255c60 38 136-40 196 0v150c-60-38-136 40-196 0z" fill="' + color + '"/>' +
+          '<path d="M52 255c60 38 136-40 196 0" fill="none" stroke="#e0b030" stroke-width="4"/><path d="M52 405c60 38 136-40 196 0" fill="none" stroke="#e0b030" stroke-width="4"/>'
+        : '<rect x="105" y="40" width="90" height="62" rx="14" fill="#fff" stroke="#e8e0dc"/><rect x="118" y="52" width="40" height="22" rx="8" fill="#eee9e5"/>' +
+          '<path d="M112 100h76c30 14 52 40 52 78v300c0 30-20 52-52 52h-76c-32 0-52-22-52-52V178c0-38 22-64 52-78z" fill="#fff" stroke="#e8e0dc"/>' +
+          '<path d="M60 255c60 38 120-40 180 0v150c-60-38-120 40-180 0z" fill="' + color + '"/>' +
+          '<path d="M60 255c60 38 120-40 180 0" fill="none" stroke="#e0b030" stroke-width="4"/><path d="M60 405c60 38 120-40 180 0" fill="none" stroke="#e0b030" stroke-width="4"/>') +
+      '<text x="150" y="215" text-anchor="middle" font-family="Georgia,serif" font-weight="700" font-size="26" fill="#1d5a2a">OVNTA</text><text x="150" y="236" text-anchor="middle" font-family="Arial" font-size="12" fill="#6b5a1e">Wellnesss</text>' +
+      tx + '<text x="150" y="' + (352 + (lines.length - 1) * 18) + '" text-anchor="middle" font-family="Arial" font-size="13" letter-spacing="4" fill="#fff">' + FL + '</text>' +
+      '<text x="150" y="448" text-anchor="middle" font-family="Arial" font-weight="700" font-size="12" fill="#222">' + esc(line2 || "AN AYURVEDIC PROPERTY") + '</text><text x="150" y="468" text-anchor="middle" font-family="Arial" font-weight="700" font-size="15" fill="#1d5a2a">' + esc(size) + '</text></g>';
   }
   var artCache = {};
   function art(p) {
     if (p.image) return p.image;
     if (artCache[p.id]) return artCache[p.id];
-    var name = p.name.replace(/ Drops$/i, "").replace(/\s*\(.*\)/, "");
+    var name = p.name.replace(/\s*\(.*\)/, "").replace(/\s+(Drops|Tablets?|Capsules|Softgels|Syrup|Serum|Resin)$/i, "");
     var inner;
     if (p.combo) {
-      var cols = ["#5b0a73", "#0f6b6b", "#9b0f2b", "#1c7c2d"], n = p.combo, s = n === 2 ? 0.85 : 0.7, labels = ["Aabha", "Alkaline", "Heart Preuro", "Fat Free"];
+      var cols = ["#5b0a73", "#1fa3dc", "#8e0f2b", "#1b5e20"], n = p.combo, s = n === 2 ? 0.85 : 0.7, labels = ["Aabha", "Alkaline", "Heart Preuro", "Fat Free"];
       inner = ""; for (var i = 0; i < n; i++) inner += bottle(600 * (i + 0.5) / n - 150 * s, (600 - 520 * s) / 2 - 40 * s, s, cols[i], labels[i]);
-    } else inner = bottle(150, 20, 1, p.color, name);
+    } else inner = bottle(150, 20, 1, p.color, name, p.form, p.size, p.labelLine);
     var svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fbeeea"/><stop offset="1" stop-color="#f1e2dc"/></linearGradient></defs><rect width="600" height="600" fill="url(#g)"/><path d="M0 0c60 20 90 70 70 130-30-20-70-40-70-130z" fill="#4f9d3a"/><path d="M600 600c-70-10-120-50-120-100 60 0 110 40 120 100z" fill="#5fae45"/>' + inner + "</svg>";
     return (artCache[p.id] = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg));
   }
@@ -87,7 +95,7 @@
   function card(p) {
     return '<article class="pcard" data-open="' + p.id + '" tabindex="0" role="link" aria-label="' + esc(p.name) + '"><div class="pimg">' + heart(p.id) +
       (p.best ? '<span class="badge">Best seller</span>' : p.isNew ? '<span class="badge new">New</span>' : "") +
-      '<img src="' + art(p) + '" alt="' + esc(p.name) + " " + esc(p.size) + ' bottle by OVNTA WELLNESS" loading="lazy"></div>' +
+      '<img src="' + art(p) + '" alt="' + esc(p.name) + " " + esc(p.size) + ' pack by OVNTA Wellnesss" loading="lazy"></div>' +
       '<div class="pbody"><span class="size">' + esc(p.size) + '</span><h3>' + esc(p.name) + '</h3><span class="cat-t">' + esc(p.cat) + '</span>' +
       '<div class="pfoot"><div class="price"><b>' + money(p.price) + "</b><s>" + money(p.mrp) + "</s><small>" + pct(p) + "% OFF</small></div>" + '<span data-ctl="' + p.id + '">' + addCtl(p.id) + "</span></div></div></article>";
   }
@@ -96,17 +104,17 @@
 
   // ---------- views ----------
   function heroHTML() {
-    var fam = prod("family-wellness-pack"), imm = prod("immunity-drops");
+    var fam = prod("family-wellness-pack"), imm = prod("hair-growth-serum");
     var slides = [
-      { cls: "hs-1", pill: "🌿 Ayurvedic · Made in Ludhiana, Punjab", h: "Nature se <em>Future</em> tak. Wellness drops, <em>delivered</em>.", p: "Thoughtfully made Ayurvedic drops for everyday care. Simple 30 ml bottles, clear information and fast delivery across India.", b1: ["Shop all products →", "#/shop"], b2: ["Our story", "#/about"], img: "images/aabha-drops.jpg", href: "#/product/aabha-drops", alt: "Aabha Drops bottle", tag: "Best seller" },
+      { cls: "hs-1", pill: "🌿 Ayurvedic · Made in Ludhiana, Punjab", h: "Nature se <em>Future</em> tak. Wellness, <em>delivered</em>.", p: "Thoughtfully made Ayurvedic drops, tablets, capsules and more for everyday care. Clear information and fast delivery across India.", b1: ["Shop all products →", "#/shop"], b2: ["Our story", "#/about"], img: "images/aabha-drops.jpg", href: "#/product/aabha-drops", alt: "Aabha Drops bottle", tag: "Best seller" },
       { cls: "hs-2", pill: "🎁 Combo offers", h: "Bundle &amp; <em>save up to " + money(fam.mrp - fam.price) + "</em>", p: "Pick the Family Wellness Pack of 4 bottles or the Daily Care Combo and pay less on every order.", b1: ["Shop combos →", "#/shop?cat=Combos"], b2: ["View family pack", "#/product/family-wellness-pack"], img: art(fam), href: "#/product/family-wellness-pack", alt: "Family Wellness Pack", tag: "Save " + pct(fam) + "%" },
-      { cls: "hs-3", pill: "✨ Just launched", h: "New arrivals: <em>Giloy Tulsi</em> &amp; more", p: "Six new Ayurvedic drops for immunity, digestion, beauty, mobility, sleep and energy are now in store.", b1: ["See new arrivals →", "#/shop?sort=new"], b2: ["Immunity Drops", "#/product/immunity-drops"], img: art(imm), href: "#/product/immunity-drops", alt: "Giloy Tulsi Immunity Drops", tag: "New" },
+      { cls: "hs-3", pill: "✨ Just launched", h: "New arrivals: <em>Hair Growth Serum</em> &amp; more", p: "Men-Ton Tablet, Thyro Relief, Memovino, Shilajit Resin, Denta Care and more are now in store.", b1: ["See new arrivals →", "#/shop?sort=new"], b2: ["Hair Growth Serum", "#/product/hair-growth-serum"], img: "images/hair-growth-serum-hero.jpg", href: "#/product/hair-growth-serum", alt: "Hair Growth Serum", tag: "New" },
       { cls: "hs-4", pill: "🚚 Free delivery above ₹499", h: "Extra <em>10% off</em> with code OVNTA10", p: "Pay with UPI, cards or net banking, or choose Cash on Delivery. Fast dispatch, easy 7-day support.", b1: ["Start shopping →", "#/shop"], b2: ["Heart Preuro Drops", "#/product/heart-preuro-drops"], img: "images/heart-preuro-drops.jpg", href: "#/product/heart-preuro-drops", alt: "Heart Preuro Drops bottle", tag: "OVNTA10" }
     ];
     return '<section class="hero" id="hero" aria-roledescription="carousel" aria-label="Featured offers"><div class="hero-track">' + slides.map(function (s, i) {
       return '<div class="hslide ' + s.cls + (i === 0 ? " on" : "") + '" aria-hidden="' + (i !== 0) + '"><div class="container hero-in"><div><span class="pill">' + s.pill + "</span><h1>" + s.h + "</h1><p>" + s.p + '</p><div class="hero-btns"><a class="btn btn-yellow" href="' + s.b1[1] + '">' + s.b1[0] + '</a><a class="btn btn-outline" href="' + s.b2[1] + '">' + s.b2[0] + "</a></div>" +
         '<div class="hero-stats"><div><b>' + P.length + '+</b><span>Products</span></div><div><b>3–5 days</b><span>Pan-India delivery</span></div><div><b>COD</b><span>+ UPI &amp; cards</span></div></div></div>' +
-        '<a class="hero-img" href="' + s.href + '" aria-label="' + esc(s.alt) + '"><div class="frame"><img src="' + s.img + '" alt="' + esc(s.alt) + ' by OVNTA WELLNESS"' + (i ? ' loading="lazy"' : "") + '></div><span class="hbadge">' + esc(s.tag) + "</span></a></div></div>";
+        '<a class="hero-img" href="' + s.href + '" aria-label="' + esc(s.alt) + '"><div class="frame"><img src="' + s.img + '" alt="' + esc(s.alt) + ' by OVNTA Wellnesss"' + (i ? ' loading="lazy"' : "") + '></div><span class="hbadge">' + esc(s.tag) + "</span></a></div></div>";
     }).join("") + '</div><button class="hnav prev" aria-label="Previous slide">‹</button><button class="hnav next" aria-label="Next slide">›</button><div class="hdots">' + slides.map(function (_, i) { return '<button aria-label="Go to slide ' + (i + 1) + '"' + (i === 0 ? ' class="on"' : "") + "></button>"; }).join("") + "</div></section>";
   }
   var heroTimer = null, revTimer = null;
@@ -125,7 +133,7 @@
     play();
   }
   function reviewsHTML() {
-    return '<section class="section alt"><div class="container"><div class="sec-head"><div><div class="eyebrow">Customer reviews</div><h2>What our customers say</h2><p>Feedback from people who ordered from OVNTA WELLNESS.</p></div><div class="rev-ctl"><button id="rprev" aria-label="Previous reviews">‹</button><button id="rnext" aria-label="Next reviews">›</button></div></div>' +
+    return '<section class="section alt"><div class="container"><div class="sec-head"><div><div class="eyebrow">Customer reviews</div><h2>What our customers say</h2><p>Feedback from people who ordered from OVNTA Wellnesss.</p></div><div class="rev-ctl"><button id="rprev" aria-label="Previous reviews">‹</button><button id="rnext" aria-label="Next reviews">›</button></div></div>' +
       '<div class="rev-wrap"><div class="rev-track" id="revtrack">' + window.REVIEWS.map(function (r) {
         return '<article class="rev"><div class="stars" aria-label="' + r[3] + ' out of 5 stars">' + "★".repeat(r[3]) + '<span style="color:#d8d8d8">' + "★".repeat(5 - r[3]) + "</span></div><p>“" + esc(r[4]) + '”</p><div class="who"><div class="av">' + esc(r[0].charAt(0)) + "</div><div><b>" + esc(r[0]) + "</b><span>" + esc(r[1]) + " · " + esc(r[2]) + "</span></div>" + (C.showSampleTag ? '<span class="smp">Sample</span>' : "") + "</div></article>";
       }).join("") + "</div></div></div></section>";
@@ -191,7 +199,7 @@
   function shopList(q) {
     var l = P.filter(function (p) {
       if (q.cat && p.cat !== q.cat) return false;
-      if (q.q) { var s = (p.name + " " + p.cat + " " + p.tags.join(" ") + " " + p.short).toLowerCase(); if (q.q.toLowerCase().split(/\s+/).some(function (w) { return s.indexOf(w) < 0; })) return false; }
+      if (q.q) { var s = (p.name + " " + p.cat + " " + p.tags.join(" ") + " " + p.short + " " + (p.kw || "")).toLowerCase(); if (q.q.toLowerCase().split(/\s+/).some(function (w) { return s.indexOf(w) < 0; })) return false; }
       return true;
     });
     return sortList(l, q.sort);
@@ -199,7 +207,7 @@
   function viewShop(q) {
     var cats = ["All"].concat(window.CATEGORIES.map(function (c) { return c.name; }));
     var list = shopList(q);
-    return '<div class="view">' + head("The wellness collection.", "Explore the complete OVNTA WELLNESS range.", "Shop all") + '<section class="container"><div class="tools"><input class="field" id="shopq" placeholder="Search the collection…" value="' + esc(q.q || "") + '" aria-label="Search"><select class="field" id="shops" aria-label="Sort"><option value="">Featured</option><option value="low"' + (q.sort === "low" ? " selected" : "") + '>Price: Low to High</option><option value="high"' + (q.sort === "high" ? " selected" : "") + '>Price: High to Low</option><option value="az"' + (q.sort === "az" ? " selected" : "") + '>Name: A to Z</option><option value="new"' + (q.sort === "new" ? " selected" : "") + ">Newest first</option></select></div>" +
+    return '<div class="view">' + head("The wellness collection.", "Explore the complete OVNTA Wellnesss range.", "Shop all") + '<section class="container"><div class="tools"><input class="field" id="shopq" placeholder="Search the collection…" value="' + esc(q.q || "") + '" aria-label="Search"><select class="field" id="shops" aria-label="Sort"><option value="">Featured</option><option value="low"' + (q.sort === "low" ? " selected" : "") + '>Price: Low to High</option><option value="high"' + (q.sort === "high" ? " selected" : "") + '>Price: High to Low</option><option value="az"' + (q.sort === "az" ? " selected" : "") + '>Name: A to Z</option><option value="new"' + (q.sort === "new" ? " selected" : "") + ">Newest first</option></select></div>" +
       '<div class="chips">' + cats.map(function (c) { var on = (c === "All" && !q.cat) || c === q.cat; return '<button class="chip ' + (on ? "on" : "") + '" data-cat="' + (c === "All" ? "" : esc(c)) + '">' + esc(c) + "</button>"; }).join("") + '</div><p style="color:var(--muted);font-size:13px;margin-bottom:14px" id="shopcount">' + list.length + ' products</p><div id="shopgrid">' + grid(list) + '</div></section><div style="height:40px"></div></div>';
   }
   function viewWish() {
@@ -214,8 +222,8 @@
     var rel = P.filter(function (x) { return x.id !== p.id && !x.combo && (x.cat === p.cat || x.best); }).slice(0, 4);
     if (rel.length < 4) rel = P.filter(function (x) { return x.id !== p.id && !x.combo; }).slice(0, 4);
     return '<div class="view"><div class="container"><div class="crumb" style="padding-top:18px"><a href="#/">Home</a> / <a href="#/shop">Shop</a> / <a href="#/shop?cat=' + encodeURIComponent(p.cat) + '">' + esc(p.cat) + "</a> / " + esc(p.name) + "</div>" +
-      '<div class="pd"><div class="pd-img"><img src="' + art(p) + '" alt="' + esc(p.name) + ' by OVNTA WELLNESS"></div><div>' +
-      '<span class="eyebrow">' + esc(p.cat) + "</span><h1>" + esc(p.name) + '</h1><div class="rating">' + esc(p.size) + " · by OVNTA WELLNESS</div>" +
+      '<div class="pd"><div class="pd-img"><img src="' + art(p) + '" alt="' + esc(p.name) + ' by OVNTA Wellnesss"></div><div>' +
+      '<span class="eyebrow">' + esc(p.cat) + "</span><h1>" + esc(p.name) + '</h1><div class="rating">' + esc(p.size) + " · by OVNTA Wellnesss</div>" +
       '<div class="price-l"><b>' + money(p.price) + "</b><s>" + money(p.mrp) + '</s><span class="save">' + pct(p) + "% OFF</span></div><div class=\"tax\">Inclusive of all taxes · " + (p.price >= C.freeShippingAbove ? "<b style='color:var(--green)'>Free delivery</b>" : "Free delivery above " + money(C.freeShippingAbove)) + "</div>" +
       '<p style="margin-top:14px;color:#444">' + esc(p.short) + '</p><div class="pd-tags">' + p.tags.map(function (t) { return '<span class="tag">' + esc(t) + "</span>"; }).join("") + "</div>" +
       '<div class="qty-row"><div class="qty"><button id="qm" aria-label="Decrease">−</button><span id="qv">1</span><button id="qp" aria-label="Increase">+</button></div><span style="color:var(--muted);font-size:13px">In stock · Ships in 24 hrs</span></div>' +
@@ -228,9 +236,17 @@
       '<div class="m-bar"><button class="btn btn-outline" id="m-add" data-id="' + p.id + '">Add to cart</button><button class="btn btn-primary" id="m-buy" data-id="' + p.id + '">Buy now · ' + money(p.price) + "</button></div></div>";
   }
   function tabBody(p) {
-    if (pdTab === "how") return "<p>" + esc(p.how) + '</p><div class="note">Please read the label carefully. Consult your doctor if you are pregnant, nursing, taking other medication, or have a medical condition.</div>';
+    var disc = '<div class="note">These statements have not been evaluated by FSSAI/AYUSH. This product is not intended to diagnose, treat, cure or prevent any disease.</div>';
+    if (pdTab === "how") {
+      return "<p><b>सेवन / उपयोग विधि:</b> " + esc(p.how) + "</p>" + (p.tip ? '<p style="margin-top:10px"><b>बेहतर परिणामों के लिए:</b> ' + esc(p.tip) + "</p>" : "") +
+        (p.caution ? '<div class="note"><b>विशेष सावधानी:</b> ' + esc(p.caution) + "</div>" : "") +
+        '<div class="note">Please read the label carefully. Consult your doctor if you are pregnant, nursing, taking other medication, or have a medical condition.</div>';
+    }
     if (pdTab === "info") return "<table>" + p.info.map(function (r) { return "<tr><td>" + esc(r[0]) + "</td><td><b>" + esc(r[1]) + "</b></td></tr>"; }).join("") + '</table><div class="note">Ingredients and exact composition are as printed on the product label.</div>';
-    return "<p>" + esc(p.desc) + '</p><div class="note">These statements have not been evaluated by FSSAI/AYUSH. This product is not intended to diagnose, treat, cure or prevent any disease.</div>';
+    return "<p>" + esc(p.desc) + "</p>" +
+      (p.benefits && p.benefits.length ? '<h4 style="margin:18px 0 8px">मुख्य लाभ एवं उपयोग</h4><ul class="benefits" style="padding-left:20px;line-height:1.7">' + p.benefits.map(function (b) { return "<li>" + esc(b) + "</li>"; }).join("") + "</ul>" : "") +
+      (p.tagline ? '<p style="margin-top:14px"><b>' + esc(p.tagline) + "</b></p>" : "") +
+      (p.caution ? '<div class="note"><b>विशेष सावधानी:</b> ' + esc(p.caution) + "</div>" : "") + disc;
   }
 
   // ----- cart drawer -----
@@ -337,7 +353,7 @@
     };
     if (C.RAZORPAY_KEY && coMethod !== "cod") {
       var open = function () {
-        var rz = new window.Razorpay({ key: C.RAZORPAY_KEY, amount: t.total * 100, currency: "INR", name: "OVNTA WELLNESS", description: "Order payment", prefill: { name: addr.name, email: addr.email, contact: addr.phone }, theme: { color: "#0C831F" },
+        var rz = new window.Razorpay({ key: C.RAZORPAY_KEY, amount: t.total * 100, currency: "INR", name: "OVNTA Wellnesss", description: "Order payment", prefill: { name: addr.name, email: addr.email, contact: addr.phone }, theme: { color: "#0C831F" },
           handler: function (r) { finish(r.razorpay_payment_id); }, modal: { ondismiss: function () { toast("Payment cancelled"); } } });
         rz.on("payment.failed", function () { toast("Payment failed. Please try again."); }); rz.open();
       };
@@ -359,7 +375,7 @@
     return '<div class="view">' + head("My orders", "Your recent purchases on this device.", "My orders") + '<section class="container" style="padding:30px 0 50px">' + (orders.length ? orders.map(function (o) { return '<div class="order"><div class="order-h"><div><b>' + o.id + '</b><div style="font-size:12.5px;color:var(--muted)">' + new Date(o.date).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" }) + '</div></div><span class="status">' + esc(o.status) + "</span></div>" + orderBox(o).replace("box ok-box", "ok-box").replace('style="', 'style="') + '<button class="btn btn-outline btn-sm" data-reorder="' + o.id + '">Reorder</button></div>'; }).join("") : '<div class="empty"><h3>No orders yet</h3><p>Once you place an order, it will show up here.</p><br><a class="btn btn-primary" href="#/shop">Start shopping</a></div>') + "</section></div>";
   }
 
-  function viewAbout() { return '<div class="view">' + head("Our story", "Nature se Future tak.", "Our story") + '<div class="container prose"><h2>Rooted in Ayurveda</h2><p>OVNTA WELLNESS began in Ludhiana, Punjab, with a simple idea: everyday wellness should feel considered, clear and calm. Our range of Ayurvedic drops brings traditional herbal knowledge into a simple 30 ml bottle you can carry anywhere.</p><h2>What we believe</h2><p><b>Thoughtful choices.</b> An invitation to make space for care in your everyday routine.</p><p><b>Clear information.</b> Product details you can understand, with no unsupported promises.</p><p><b>Care that connects.</b> Personal assistance from our customer care team.</p><p><b>Your own rhythm.</b> A considered approach to your individual wellness journey.</p><br><a class="btn btn-primary" href="#/shop">Explore the range</a></div></div>'; }
+  function viewAbout() { return '<div class="view">' + head("Our story", "Nature se Future tak.", "Our story") + '<div class="container prose"><h2>Rooted in Ayurveda</h2><p>OVNTA Wellnesss began in Ludhiana, Punjab, with a simple idea: everyday wellness should feel considered, clear and calm. Our range of Ayurvedic drops brings traditional herbal knowledge into a simple 30 ml bottle you can carry anywhere.</p><h2>What we believe</h2><p><b>Thoughtful choices.</b> An invitation to make space for care in your everyday routine.</p><p><b>Clear information.</b> Product details you can understand, with no unsupported promises.</p><p><b>Care that connects.</b> Personal assistance from our customer care team.</p><p><b>Your own rhythm.</b> A considered approach to your individual wellness journey.</p><br><a class="btn btn-primary" href="#/shop">Explore the range</a></div></div>'; }
   function viewFaq() { return '<div class="view">' + head("FAQs & support", "Quick answers about orders, delivery and payments.", "FAQs") + '<div class="container prose">' + window.FAQS.map(function (f) { return '<div class="faq"><button>' + esc(f[0]) + "</button><div>" + esc(f[1]) + "</div></div>"; }).join("") + '<p style="margin-top:24px">Still need help? <a href="#/contact" style="color:var(--green);font-weight:700">Contact us →</a></p></div></div>'; }
   function viewContact() { return '<div class="view">' + head("Get in touch", "We usually reply within one working day.", "Contact") + '<div class="container contact"><div class="cinfo"><p><b>Email</b><a href="mailto:' + C.email + '">' + C.email + '</a></p><p><b>Phone</b><a href="tel:+919115111553">' + C.phone + '</a></p><p><b>Address</b>' + C.address + '</p></div><form class="box" id="contactf"><div class="fg">' + fld("cname", "Your name", "required", true) + fld("cmail", "Email", 'type="email" required') + fld("cphone", "Phone (optional)") + '<div class="full"><label class="lbl" for="cmsgt">Message</label><textarea class="field" id="cmsgt" rows="5" required></textarea></div></div><button class="btn btn-primary" style="margin-top:14px">Send message</button></form></div></div>'; }
 
@@ -376,7 +392,7 @@
     if (a === "" ) html = viewHome();
     else if (a === "shop") html = viewShop(r.q);
     else if (a === "wishlist") html = viewWish();
-    else if (a === "product") { pdTab = "desc"; html = viewProduct(r.parts[1]); document.body.classList.add("has-mbar"); var pp = prod(r.parts[1]); document.title = (pp ? pp.name + " | " : "") + "OVNTA WELLNESS"; }
+    else if (a === "product") { pdTab = "desc"; html = viewProduct(r.parts[1]); document.body.classList.add("has-mbar"); var pp = prod(r.parts[1]); document.title = (pp ? pp.name + " | " : "") + "OVNTA Wellnesss"; }
     else if (a === "checkout") html = viewCheckout(r.q);
     else if (a === "success") html = viewSuccess(r.parts[1]);
     else if (a === "orders") html = viewOrders();
@@ -384,7 +400,7 @@
     else if (a === "faq") html = viewFaq();
     else if (a === "contact") html = viewContact();
     else html = '<div class="container empty" style="padding:90px 0"><h3>Page not found</h3><br><a class="btn btn-primary" href="#/">Go home</a></div>';
-    if (a !== "product") document.title = "OVNTA WELLNESS | Ayurvedic Drops, Delivered";
+    if (a !== "product") document.title = "OVNTA Wellnesss | Ayurvedic Drops, Delivered";
     app.innerHTML = html;
     $$("[data-nav]").forEach(function (n) { n.classList.toggle("active", n.dataset.nav === nav); });
     $("#mnav").classList.remove("open");
